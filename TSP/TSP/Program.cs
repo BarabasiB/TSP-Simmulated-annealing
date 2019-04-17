@@ -10,7 +10,8 @@ namespace TSP
     {
         static void Main(string[] args)
         {
-            List<Point> points = GeneratePoints(10);
+            int numberOfPoints = 30;
+            List<Point> points = GeneratePoints(numberOfPoints);
         }
 
         private static List<Point> GeneratePoints(int size)
@@ -26,6 +27,12 @@ namespace TSP
                 });
             }
             return points;
+        }
+
+        private static int RandomPosition(int size)
+        {
+            Random rand = new Random();
+            return rand.Next(0, size);
         }
     }
 }
