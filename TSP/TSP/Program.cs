@@ -34,5 +34,32 @@ namespace TSP
             Random rand = new Random();
             return rand.Next(0, size);
         }
+
+        private static double CalculateGlobalDistance(List<Point> points)
+        {
+            double distance = 0;
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+                distance += points[i].Distance(points[i + 1]);
+            }
+            distance += points[points.Count - 1].Distance(points[0]);
+            return distance;
+        }
+
+        private static List<Point> SwapCities(List<Point> points, int citiesToSwap)
+        {
+            List<Point> cities = new List<Point>(points);
+            Random rand = new Random();
+            int idx1, idx2;
+            for (int i = 0; i < citiesToSwap; i++)
+            {
+                idx1 = rand.Next(0, cities.Count);
+                idx2 = rand.Next(0, cities.Count);
+                var temp = cities[idx1];
+                cities[idx1] = cities[idx2];
+                cities[idx2] = temp;
+            }
+            return cities;
+        }
     }
 }
