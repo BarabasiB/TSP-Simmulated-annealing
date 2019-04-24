@@ -12,6 +12,11 @@ namespace TSP
         {
             int numberOfPoints = 30;
             List<Point> points = GeneratePoints(numberOfPoints);
+            for (int i = 0; i < points.Count; i++)
+            {
+                Console.WriteLine(i + ". (" + points[i].X + "," + points[i].Y + ")");
+            }
+            SimulateAnnealing(points, 30, 0.1, 3000, 5);
         }
 
         private static List<Point> GeneratePoints(int size)
@@ -60,6 +65,68 @@ namespace TSP
                 cities[idx2] = temp;
             }
             return cities;
+        }
+
+        private static void SimulateAnnealing(List<Point> points, double initialTemperature, double coolingRate, int treshold, int numberOfCitiesToSwap)
+        {
+            Random rand = new Random();
+            double temperature = initialTemperature;
+            int iterations = 1;
+            int temperatureIterations = 1;
+            double previousDistance = CalculateGlobalDistance(points);
+            while (iterations < treshold && temperature > 0)
+            {
+                var cities = SwapCities(points, numberOfCitiesToSwap);
+                double currentDistance = CalculateGlobalDistance(cities);
+                double difference = Math.Abs(currentDistance - previousDistance);
+                if (currentDistance < previousDistance)
+                {
+                    points = cities;
+                    if (temperatureIterations >= 10)
+                    {
+                        temperature = temperature - coolingRate;
+                        temperatureIterations = 0;
+                    }
+                    numberOfCitiesToSwap = (int)Math.Round(numberOfCitiesToSwap * Math.Exp(-difference / (iterations * temperature)));
+                    if (numberOfCitiesToSwap == 0)
+                    {
+                        numberOfCitiesToSwap = 1;
+                    }
+                    previousDistance = currentDistance;
+                    iterations += 1;
+                    temperatureIterations += 1;
+                }
+                else
+                {
+                    if (rand.NextDouble() < Math.Exp(-difference/temperature))
+                    {
+                        points = cities;
+                        if (temperatureIterations >= 10)
+                        {
+                            temperature = temperature - coolingRate;
+                            temperatureIterations = 0;
+                        }
+                        numberOfCitiesToSwap = (int)Math.Round(numberOfCitiesToSwap * Math.Exp(-difference / (iterations * temperature)));
+                        if (numberOfCitiesToSwap == 0)
+                        {
+                            numberOfCitiesToSwap = 1;
+                        }
+                        previousDistance = currentDistance;
+                        iterations += 1;
+                        temperatureIterations += 1;
+                    }
+                }
+            }
+            PrintResult(previousDistance, iterations, temperature);
+        }
+
+        private static void PrintResult(double distance, int iteration, double temperature)
+        {
+            Console.WriteLine("Finished annealing!");
+            Console.WriteLine("Distance: " + distance);
+            Console.WriteLine("Iterations: " + iteration);
+            Console.WriteLine("Temperature: " + temperature);
+            Console.ReadKey();
         }
     }
 }
