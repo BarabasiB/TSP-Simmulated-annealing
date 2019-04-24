@@ -10,13 +10,19 @@ namespace TSP
     {
         static void Main(string[] args)
         {
-            int numberOfPoints = 30;
+            Console.WriteLine("Number of points you want to generate: ");
+            int numberOfPoints = int.Parse(Console.ReadLine());
+            Console.WriteLine("Initial temperature: ");
+            double initialTemperature = double.Parse(Console.ReadLine());
+            Console.WriteLine("Cooling rate: ");
+            double coolingRate = double.Parse(Console.ReadLine());
             List<Point> points = GeneratePoints(numberOfPoints);
             for (int i = 0; i < points.Count; i++)
             {
-                Console.WriteLine(i + ". (" + points[i].X + "," + points[i].Y + ")");
+                Console.WriteLine(points[i].Order + ". (" + points[i].X + "," + points[i].Y + ")");
             }
-            SimulateAnnealing(points, 30, 0.1, 3000, 5);
+            Console.WriteLine("Starting distance:" + CalculateGlobalDistance(points));
+            SimulateAnnealing(points, initialTemperature, coolingRate);
         }
 
         private static List<Point> GeneratePoints(int size)
@@ -27,6 +33,7 @@ namespace TSP
             {
                 points.Add(new Point
                 {
+                    Order = i + 1,
                     X = rand.NextDouble() * 100,
                     Y = rand.NextDouble() * 100
                 });
@@ -66,66 +73,53 @@ namespace TSP
             }
             return cities;
         }
-
-        private static void SimulateAnnealing(List<Point> points, double initialTemperature, double coolingRate, int treshold, int numberOfCitiesToSwap)
+        
+        private static void SimulateAnnealing(List<Point> points, double initialTtemperature, double coolingRate)
         {
             Random rand = new Random();
-            double temperature = initialTemperature;
-            int iterations = 1;
-            int temperatureIterations = 1;
+            int iterations = 0;
+            double temperature = initialTtemperature;
             double previousDistance = CalculateGlobalDistance(points);
-            while (iterations < treshold && temperature > 0)
+            List<Point> currentSolution = new List<Point>(points);
+            List<Point> bestSolution = new List<Point>(points);
+
+            while (temperature > 1)
             {
-                var cities = SwapCities(points, numberOfCitiesToSwap);
+                var cities = SwapCities(points, 1);
                 double currentDistance = CalculateGlobalDistance(cities);
                 double difference = Math.Abs(currentDistance - previousDistance);
                 if (currentDistance < previousDistance)
                 {
-                    points = cities;
-                    if (temperatureIterations >= 10)
-                    {
-                        temperature = temperature - coolingRate;
-                        temperatureIterations = 0;
-                    }
-                    numberOfCitiesToSwap = (int)Math.Round(numberOfCitiesToSwap * Math.Exp(-difference / (iterations * temperature)));
-                    if (numberOfCitiesToSwap == 0)
-                    {
-                        numberOfCitiesToSwap = 1;
-                    }
+                    currentSolution = cities;
+                    bestSolution = cities;
                     previousDistance = currentDistance;
-                    iterations += 1;
-                    temperatureIterations += 1;
                 }
                 else
                 {
-                    if (rand.NextDouble() < Math.Exp(-difference/temperature))
+                    if (Math.Exp((previousDistance - currentDistance)/temperature) > rand.NextDouble())
                     {
-                        points = cities;
-                        if (temperatureIterations >= 10)
-                        {
-                            temperature = temperature - coolingRate;
-                            temperatureIterations = 0;
-                        }
-                        numberOfCitiesToSwap = (int)Math.Round(numberOfCitiesToSwap * Math.Exp(-difference / (iterations * temperature)));
-                        if (numberOfCitiesToSwap == 0)
-                        {
-                            numberOfCitiesToSwap = 1;
-                        }
+                        currentSolution = cities;
                         previousDistance = currentDistance;
-                        iterations += 1;
-                        temperatureIterations += 1;
                     }
                 }
+
+                temperature *= 1 - coolingRate;
+                iterations += 1;
             }
-            PrintResult(previousDistance, iterations, temperature);
+            PrintResult(bestSolution, iterations, temperature);
         }
 
-        private static void PrintResult(double distance, int iteration, double temperature)
+        private static void PrintResult(List<Point> solution, int iteration, double temperature)
         {
+            Console.WriteLine();
             Console.WriteLine("Finished annealing!");
-            Console.WriteLine("Distance: " + distance);
+            Console.WriteLine("Distance: " + CalculateGlobalDistance(solution));
             Console.WriteLine("Iterations: " + iteration);
             Console.WriteLine("Temperature: " + temperature);
+            for (int i = 0; i < solution.Count; i++)
+            {
+                Console.WriteLine(solution[i].Order + ". (" + solution[i].X + "," + solution[i].Y + ")");
+            }
             Console.ReadKey();
         }
     }
