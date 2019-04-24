@@ -19,7 +19,7 @@ namespace TSP
             List<Point> points = GeneratePoints(numberOfPoints);
             for (int i = 0; i < points.Count; i++)
             {
-                Console.WriteLine(points[i].Order + ". (" + points[i].X + "," + points[i].Y + ")");
+                Console.WriteLine(points[i].PrintPoint());
             }
             Console.WriteLine("Starting distance:" + CalculateGlobalDistance(points));
             SimulateAnnealing(points, initialTemperature, coolingRate);
@@ -118,7 +118,7 @@ namespace TSP
             Console.WriteLine("Temperature: " + temperature);
             for (int i = 0; i < solution.Count; i++)
             {
-                Console.WriteLine(solution[i].Order + ". (" + solution[i].X + "," + solution[i].Y + ")");
+                Console.WriteLine(solution[i].PrintPoint());
             }
             Console.ReadKey();
         }

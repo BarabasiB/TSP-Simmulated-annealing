@@ -18,5 +18,10 @@ namespace TSP
             double distY = this.Y - b.Y;
             return Math.Sqrt(distX * distX + distY * distY);
         }
+
+        public string PrintPoint()
+        {
+            return this.Order.ToString() + ". (" + this.X.ToString() + "," + this.Y.ToString() + ")";
+        }
     }
 }
